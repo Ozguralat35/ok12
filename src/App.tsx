@@ -321,17 +321,19 @@ function App() {
       </div>
 
       {/* Voice Mode Panel */}
-      <VoiceModePanel
-        isVoiceMode={isVoiceMode}
-        isListening={isListening}
-        isSpeaking={isSpeaking}
-        isLoading={isLoading}
-        autoSpeak={autoSpeak}
-        speechRecognitionSupported={speechRecognitionSupported}
-        speechSynthesisSupported={speechSynthesisSupported}
-        onVoiceToggle={handleVoiceToggle}
-        onAutoSpeakToggle={() => setAutoSpeak(!autoSpeak)}
-      />
+      {isVoiceMode && (
+        <VoiceModePanel
+          isVoiceMode={isVoiceMode}
+          isListening={isListening}
+          isSpeaking={isSpeaking}
+          isLoading={isLoading}
+          autoSpeak={autoSpeak}
+          speechRecognitionSupported={speechRecognitionSupported}
+          speechSynthesisSupported={speechSynthesisSupported}
+          onVoiceToggle={handleVoiceToggle}
+          onAutoSpeakToggle={() => setAutoSpeak(!autoSpeak)}
+        />
+      )}
 
       {/* Chat Container */}
       <div className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-4 flex flex-col min-h-0">
@@ -365,13 +367,13 @@ function App() {
                     </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 flex-wrap">
                   {/* Voice Mode Toggle */}
                   {speechRecognitionSupported && speechSynthesisSupported && (
                     <button
                       onClick={handleVoiceToggle}
                       disabled={isLoading}
-                      className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-colors font-medium bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                      className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors font-medium bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                       title="Sesli konuşma başlat"
                     >
                       <Mic className="w-4 h-4" />
@@ -497,7 +499,7 @@ function App() {
                   {msg.type === 'bot' && (
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
-                        <RobotAvatar size="sm\" isSpeaking={isSpeaking} />
+                        <RobotAvatar size="sm" isSpeaking={isSpeaking} />
                         <span className="font-medium text-[#003366] ml-2">Robot Asistan</span>
                       </div>
                       {speechSynthesisSupported && !isVoiceMode && (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mic, MicOff, Volume2, VolumeX, Bot } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { RobotAvatar } from './RobotAvatar';
 
 interface VoiceModePanelProps {
@@ -25,16 +25,14 @@ export const VoiceModePanel: React.FC<VoiceModePanelProps> = ({
   onVoiceToggle,
   onAutoSpeakToggle
 }) => {
-  if (!isVoiceMode) return null;
-
   return (
-    <div className="border-b border-gray-200 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 flex-shrink-0">
+    <div className="border-b border-gray-200 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 flex-shrink-0">
       <div className="max-w-4xl mx-auto">
         {/* Robot and Status */}
-        <div className="flex items-center justify-center mb-6">
+        <div className="flex items-center justify-center mb-4">
           <div className="text-center">
             <RobotAvatar 
-              size="xl"
+              size="lg"
               isListening={isListening}
               isSpeaking={isSpeaking}
               isThinking={isLoading}
@@ -74,9 +72,9 @@ export const VoiceModePanel: React.FC<VoiceModePanelProps> = ({
         </div>
 
         {/* Voice Mode Info */}
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 mb-4">
+        <div className="bg-white rounded-xl p-3 shadow-sm border border-gray-200 mb-4">
           <div className="text-center">
-            <p className="text-sm text-gray-600 mb-2">
+            <p className="text-sm text-gray-600 mb-1">
               🔄 <strong>Otomatik Sesli Konuşma Aktif</strong>
             </p>
             <p className="text-xs text-gray-500">
@@ -86,19 +84,19 @@ export const VoiceModePanel: React.FC<VoiceModePanelProps> = ({
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-center gap-3">
           <button
             onClick={onVoiceToggle}
-            className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors font-medium shadow-lg"
+            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors font-medium shadow-lg text-sm"
           >
-            <MicOff className="w-5 h-5" />
+            <MicOff className="w-4 h-4" />
             Sesli Modu Durdur
           </button>
           
           {speechSynthesisSupported && (
             <button
               onClick={onAutoSpeakToggle}
-              className={`flex items-center gap-2 px-4 py-3 rounded-xl transition-colors font-medium ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-colors font-medium text-sm ${
                 autoSpeak
                   ? 'bg-green-500 text-white hover:bg-green-600'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -108,24 +106,6 @@ export const VoiceModePanel: React.FC<VoiceModePanelProps> = ({
               Otomatik Ses
             </button>
           )}
-        </div>
-
-        {/* Technical Status */}
-        <div className="mt-4 text-center">
-          <div className="flex items-center justify-center gap-6 text-xs text-gray-500">
-            {speechRecognitionSupported && (
-              <span className="flex items-center gap-1">
-                <Mic className="w-3 h-3" />
-                Ses tanıma: Aktif
-              </span>
-            )}
-            {speechSynthesisSupported && (
-              <span className="flex items-center gap-1">
-                <Volume2 className="w-3 h-3" />
-                Sesli okuma: Aktif
-              </span>
-            )}
-          </div>
         </div>
       </div>
     </div>
