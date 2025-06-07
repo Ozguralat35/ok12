@@ -499,7 +499,7 @@ function App() {
                   {msg.type === 'bot' && (
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
-                        <RobotAvatar size="sm" isSpeaking={isSpeaking} />
+                        <RobotAvatar size="sm\" isSpeaking={isSpeaking} />
                         <span className="font-medium text-[#003366] ml-2">Robot Asistan</span>
                       </div>
                       {speechSynthesisSupported && !isVoiceMode && (
