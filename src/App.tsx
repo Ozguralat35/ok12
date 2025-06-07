@@ -4,6 +4,8 @@ import { ChatMessage, ChatAttachment, Source } from './types';
 import { sendChatMessage, ChatApiError } from './api';
 import { useSpeechRecognition } from './hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from './hooks/useSpeechSynthesis';
+import { RobotAvatar } from './components/RobotAvatar';
+import { VoiceModePanel } from './components/VoiceModePanel';
 
 function App() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -318,143 +320,124 @@ function App() {
         </div>
       </div>
 
+      {/* Voice Mode Panel */}
+      <VoiceModePanel
+        isVoiceMode={isVoiceMode}
+        isListening={isListening}
+        isSpeaking={isSpeaking}
+        isLoading={isLoading}
+        autoSpeak={autoSpeak}
+        speechRecognitionSupported={speechRecognitionSupported}
+        speechSynthesisSupported={speechSynthesisSupported}
+        onVoiceToggle={handleVoiceToggle}
+        onAutoSpeakToggle={() => setAutoSpeak(!autoSpeak)}
+      />
+
       {/* Chat Container */}
       <div className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-4 flex flex-col min-h-0">
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 flex flex-col flex-1 min-h-0">
-          {/* Control Panel */}
-          <div className="border-b border-gray-200 p-4 bg-gray-50 rounded-t-2xl flex-shrink-0">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-gray-700">Mod:</span>
-                <div className="flex bg-white rounded-lg border border-gray-200 overflow-hidden">
-                  <button
-                    onClick={() => setMode('chat')}
-                    className={`px-4 py-2 text-sm font-medium transition-colors ${
-                      mode === 'chat'
-                        ? 'bg-[#003366] text-white'
-                        : 'text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    Chat
-                  </button>
-                  <button
-                    onClick={() => setMode('query')}
-                    className={`px-4 py-2 text-sm font-medium transition-colors ${
-                      mode === 'query'
-                        ? 'bg-[#003366] text-white'
-                        : 'text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    Query
-                  </button>
+          {/* Control Panel - Hidden in voice mode */}
+          {!isVoiceMode && (
+            <div className="border-b border-gray-200 p-4 bg-gray-50 rounded-t-2xl flex-shrink-0">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-gray-700">Mod:</span>
+                  <div className="flex bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <button
+                      onClick={() => setMode('chat')}
+                      className={`px-4 py-2 text-sm font-medium transition-colors ${
+                        mode === 'chat'
+                          ? 'bg-[#003366] text-white'
+                          : 'text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      Chat
+                    </button>
+                    <button
+                      onClick={() => setMode('query')}
+                      className={`px-4 py-2 text-sm font-medium transition-colors ${
+                        mode === 'query'
+                          ? 'bg-[#003366] text-white'
+                          : 'text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      Query
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                {/* Voice Mode Toggle */}
-                {speechRecognitionSupported && speechSynthesisSupported && (
+                <div className="flex items-center gap-3">
+                  {/* Voice Mode Toggle */}
+                  {speechRecognitionSupported && speechSynthesisSupported && (
+                    <button
+                      onClick={handleVoiceToggle}
+                      disabled={isLoading}
+                      className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-colors font-medium bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                      title="Sesli konuşma başlat"
+                    >
+                      <Mic className="w-4 h-4" />
+                      🤖 Robot ile Konuş
+                    </button>
+                  )}
+                  
+                  {/* Auto Speak Toggle */}
+                  {speechSynthesisSupported && (
+                    <button
+                      onClick={() => setAutoSpeak(!autoSpeak)}
+                      className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+                        autoSpeak
+                          ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                      }`}
+                      title={autoSpeak ? 'Otomatik konuşmayı kapat' : 'Otomatik konuşmayı aç'}
+                    >
+                      {autoSpeak ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                      Otomatik Ses
+                    </button>
+                  )}
+                  
+                  {sources.length > 0 && (
+                    <button
+                      onClick={() => setShowSources(!showSources)}
+                      className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                    >
+                      <FileText className="w-4 h-4" />
+                      Kaynaklar ({sources.length})
+                    </button>
+                  )}
                   <button
-                    onClick={handleVoiceToggle}
+                    onClick={handleResetChat}
                     disabled={isLoading}
-                    className={`flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-colors font-medium ${
-                      isVoiceMode
-                        ? 'bg-green-500 text-white hover:bg-green-600'
-                        : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                    title={isVoiceMode ? 'Sesli konuşmayı durdur' : 'Sesli konuşma başlat'}
+                    className="flex items-center gap-2 px-3 py-2 text-sm bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isVoiceMode ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                    {isVoiceMode ? 'Sesli Mod Aktif' : 'Sesli Konuşma'}
+                    <RotateCcw className="w-4 h-4" />
+                    Sıfırla
                   </button>
-                )}
-                
-                {/* Auto Speak Toggle */}
-                {speechSynthesisSupported && (
-                  <button
-                    onClick={() => setAutoSpeak(!autoSpeak)}
-                    className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                      autoSpeak
-                        ? 'bg-green-50 text-green-700 hover:bg-green-100'
-                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                    }`}
-                    title={autoSpeak ? 'Otomatik konuşmayı kapat' : 'Otomatik konuşmayı aç'}
-                  >
-                    {autoSpeak ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-                    Otomatik Ses
-                  </button>
-                )}
-                
-                {sources.length > 0 && (
-                  <button
-                    onClick={() => setShowSources(!showSources)}
-                    className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
-                  >
-                    <FileText className="w-4 h-4" />
-                    Kaynaklar ({sources.length})
-                  </button>
-                )}
-                <button
-                  onClick={handleResetChat}
-                  disabled={isLoading}
-                  className="flex items-center gap-2 px-3 py-2 text-sm bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  Sıfırla
-                </button>
-              </div>
-            </div>
-            
-            {/* Mode Description */}
-            <div className="mt-3 text-xs text-gray-600">
-              {mode === 'chat' 
-                ? 'Chat modu: Genel bilgi ve özel verilerle yanıt verir, sohbet geçmişini hatırlar.'
-                : 'Query modu: Sadece veritabanındaki ilgili kaynaklardan yanıt verir, geçmiş hatırlanmaz.'
-              }
-            </div>
-
-            {/* Voice Status */}
-            {(speechRecognitionSupported || speechSynthesisSupported) && (
-              <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
-                {speechRecognitionSupported && (
-                  <span className="flex items-center gap-1">
-                    <Mic className="w-3 h-3" />
-                    Ses tanıma: {speechRecognitionSupported ? 'Destekleniyor' : 'Desteklenmiyor'}
-                  </span>
-                )}
-                {speechSynthesisSupported && (
-                  <span className="flex items-center gap-1">
-                    <Volume2 className="w-3 h-3" />
-                    Sesli okuma: {speechSynthesisSupported ? 'Destekleniyor' : 'Desteklenmiyor'}
-                  </span>
-                )}
-              </div>
-            )}
-
-            {/* Voice Mode Status */}
-            {isVoiceMode && (
-              <div className="mt-2 p-3 bg-green-50 rounded-lg border border-green-200">
-                <div className="flex items-center gap-2 mb-2">
-                  {isListening && (
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  )}
-                  {isSpeaking && (
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                  )}
-                  {isLoading && (
-                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                  )}
-                  <span className="text-sm text-green-700 font-medium">
-                    {isListening ? '🎤 Dinleniyor... Konuşun!' : 
-                     isSpeaking ? '🔊 Yanıt okunuyor...' : 
-                     isLoading ? '⏳ Yanıt hazırlanıyor...' : 
-                     '✅ Hazır - Konuşmaya başlayın'}
-                  </span>
                 </div>
-                <p className="text-xs text-green-600">
-                  🔄 Otomatik döngü: Konuş → Gönder → Yanıt al → Oku → Tekrar dinle
-                </p>
               </div>
-            )}
-          </div>
+              
+              {/* Mode Description */}
+              <div className="mt-3 text-xs text-gray-600">
+                {mode === 'chat' 
+                  ? 'Chat modu: Genel bilgi ve özel verilerle yanıt verir, sohbet geçmişini hatırlar.'
+                  : 'Query modu: Sadece veritabanındaki ilgili kaynaklardan yanıt verir, geçmiş hatırlanmaz.'
+                }
+              </div>
+
+              {/* Voice Features Info */}
+              {(speechRecognitionSupported || speechSynthesisSupported) && (
+                <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <RobotAvatar size="sm" />
+                    <span className="text-sm font-medium text-blue-800">🎤 Sesli Konuşma Özelliği</span>
+                  </div>
+                  <p className="text-xs text-blue-700">
+                    <strong>"🤖 Robot ile Konuş"</strong> butonuna basarak sürekli sesli sohbet edebilirsiniz!<br/>
+                    Konuş → Otomatik gönder → Yanıt al → Robot okur → Tekrar dinle
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Sources Panel */}
           {showSources && sources.length > 0 && (
@@ -475,16 +458,23 @@ function App() {
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 min-h-0">
             {messages.length === 0 && (
               <div className="text-center text-gray-600 py-8">
-                <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200 shadow-lg">
-                  <Bot className="w-12 h-12 mx-auto mb-4 text-[#003366]" />
+                <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-8 rounded-2xl border border-gray-200 shadow-lg">
+                  <div className="flex justify-center mb-4">
+                    <RobotAvatar size="xl" />
+                  </div>
                   <p className="text-xl sm:text-2xl font-medium mb-3">Merhaba! Size nasıl yardımcı olabilirim?</p>
-                  <p className="text-gray-500">Herhangi bir sorunuzu yanıtlamaya hazırım.</p>
+                  <p className="text-gray-500 mb-4">Herhangi bir sorunuzu yanıtlamaya hazırım.</p>
                   {speechRecognitionSupported && speechSynthesisSupported && (
-                    <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <p className="text-sm text-blue-700 font-medium">🎤 Sesli Konuşma Özelliği</p>
-                      <p className="text-xs text-blue-600 mt-1">
-                        "Sesli Konuşma" butonuna basarak sürekli sesli sohbet edebilirsiniz!<br/>
-                        Konuş → Otomatik gönder → Yanıt al → Otomatik oku → Tekrar dinle
+                    <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <RobotAvatar size="sm" />
+                        <span className="text-sm font-bold text-green-700">🎤 Sesli Konuşma Özelliği</span>
+                      </div>
+                      <p className="text-sm text-green-700 font-medium mb-1">
+                        "🤖 Robot ile Konuş" butonuna basın!
+                      </p>
+                      <p className="text-xs text-green-600">
+                        Sürekli sesli sohbet: Konuş → Gönder → Yanıt → Oku → Tekrar dinle
                       </p>
                     </div>
                   )}
@@ -507,8 +497,8 @@ function App() {
                   {msg.type === 'bot' && (
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
-                        <Bot className="w-5 h-5 mr-2 text-[#003366]" />
-                        <span className="font-medium text-[#003366]">Asistan</span>
+                        <RobotAvatar size="sm" isSpeaking={isSpeaking} />
+                        <span className="font-medium text-[#003366] ml-2">Robot Asistan</span>
                       </div>
                       {speechSynthesisSupported && !isVoiceMode && (
                         <button
@@ -542,8 +532,8 @@ function App() {
               <div className="flex justify-start mb-4">
                 <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4">
                   <div className="flex items-center">
-                    <Bot className="w-5 h-5 mr-2 text-[#003366]" />
-                    <div className="flex space-x-2">
+                    <RobotAvatar size="sm" isThinking={true} />
+                    <div className="flex space-x-2 ml-2">
                       <div className="w-2 h-2 bg-[#003366] rounded-full animate-bounce"></div>
                       <div className="w-2 h-2 bg-[#003366] rounded-full animate-bounce delay-150"></div>
                       <div className="w-2 h-2 bg-[#003366] rounded-full animate-bounce delay-300"></div>
